@@ -178,8 +178,10 @@ public class DocParser {
                                 .build(provider);
 
             List<PutMessagesDetailsEntry> messages = new ArrayList<>();
-             messages.add(PutMessagesDetailsEntry.builder().key(String.format("messageKey-%s", objectName).getBytes(UTF_8))
-                        .value(String.format("messageValue-%s", jsonString).getBytes(UTF_8)).build());
+             messages.add(PutMessagesDetailsEntry.builder()
+                        .key(objectName.getBytes(UTF_8))
+                        .value(jsonString.getBytes(UTF_8))
+                        .build());
 
             PutMessagesDetails messagesDetails =
                     PutMessagesDetails.builder()
@@ -223,7 +225,7 @@ public class DocParser {
             JsonObject jsondoc = parseObject(getObjectResponse, path);
 
             //writeObject(jsondoc, namespace, outputBucketName, resourceName+".json");
-            //streamObject(jsondoc, resourceName, compartmentId);
+            streamObject(jsondoc, resourceName, compartmentId);
 
             return jsondoc.toString(); //"ok";
         } catch (Exception ex) {
