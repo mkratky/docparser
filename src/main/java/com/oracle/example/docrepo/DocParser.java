@@ -54,11 +54,6 @@ public class DocParser {
     public DocParser(RuntimeContext ctx) {
         initOciClients();
         outputBucketName = reqEnv(ctx, "OUTPUT_BUCKET");
-/*        outputBucketName = "OSUploadBucket";
-        System.setProperty("OCI_RESOURCE_PRINCIPAL_VERSION","1.1");
-        System.setProperty("OCI_CLI_AUTH","resource_principal");
-        System.setProperty("OCI_RESOURCE_PRINCIPAL_RPT_ENDPOINT", "https://objectstorage.eu-frankfurt-1.oraclecloud.com");
-*/
     }
 
     private String reqEnv(RuntimeContext ctx, String key) {
@@ -69,8 +64,7 @@ public class DocParser {
     private void initOciClients() {
         System.out.println("Inside initOciClients");
         try {
-            provider  = ResourcePrincipalAuthenticationDetailsProvider.builder()
-                                .build();
+            provider  = ResourcePrincipalAuthenticationDetailsProvider.builder().build();
             System.err.println("ResourcePrincipalAuthenticationDetailsProvider setup");
             objectStorageClient = ObjectStorageClient.builder().build(provider);
             objectStorageClient.setRegion(Region.EU_FRANKFURT_1);
@@ -160,37 +154,32 @@ public class DocParser {
             if (!listResponse.getItems().isEmpty()) {
                 // if we find an active stream with the correct name, we'll use it.
                 System.out.println(String.format("An active stream named %s was found.", streamName));
-
                 String streamId = listResponse.getItems().get(0).getId();
-
-
-
-            GetStreamRequest getStreamRequest =
+                GetStreamRequest getStreamRequest =
                     GetStreamRequest.builder()
                             .streamId(streamId)
                             .build();
-            GetStreamResponse getStreamResponse = streamAdminClient.getStream(getStreamRequest);
-            stream = getStreamResponse.getStream();
-
-            StreamClient streamClient =
+                GetStreamResponse getStreamResponse = streamAdminClient.getStream(getStreamRequest);
+                stream = getStreamResponse.getStream();
+                StreamClient streamClient =
                         StreamClient.builder()
                                 .endpoint(stream.getMessagesEndpoint()) //"https://cell-1.streaming.eu-frankfurt-1.oci.oraclecloud.com"
                                 .build(provider);
 
-            List<PutMessagesDetailsEntry> messages = new ArrayList<>();
-             messages.add(PutMessagesDetailsEntry.builder()
+                List<PutMessagesDetailsEntry> messages = new ArrayList<>();
+                messages.add(PutMessagesDetailsEntry.builder()
                         .key(objectName.getBytes(UTF_8))
                         .value(jsonString.getBytes(UTF_8))
                         .build());
 
-            PutMessagesDetails messagesDetails =
+                PutMessagesDetails messagesDetails =
                     PutMessagesDetails.builder()
                             .messages(messages)
                             .build();
-            PutMessagesRequest putRequest = PutMessagesRequest.builder().streamId(streamId)
+                PutMessagesRequest putRequest = PutMessagesRequest.builder().streamId(streamId)
                         .putMessagesDetails(messagesDetails).build();
 
-            PutMessagesResponse putResponse = streamClient.putMessages(putRequest);
+                PutMessagesResponse putResponse = streamClient.putMessages(putRequest);
 
                 // the putResponse can contain some useful metadata for handling failures
                 for (PutMessagesResultEntry entry : putResponse.getPutMessagesResult().getEntries()) {
@@ -201,10 +190,7 @@ public class DocParser {
                                 entry.getOffset()));
                     }
                 }
-
             }
-
-
         } catch (Exception e) {
             throw new RuntimeException("Failed to write to streaming " + e);
         }
@@ -212,7 +198,6 @@ public class DocParser {
 
     public String handleRequest(@InputBinding(coercion = OCIEventBinding.class) ObjectStorageObjectEvent event) {
         System.err.println("Got a new event: " + event.toString());
-
         try {
             String namespace = event.additionalDetails.namespace;
             String bucketName = event.additionalDetails.bucketName;
@@ -224,7 +209,7 @@ public class DocParser {
 
             JsonObject jsondoc = parseObject(getObjectResponse, path);
 
-            //writeObject(jsondoc, namespace, outputBucketName, resourceName+".json");
+            writeObject(jsondoc, namespace, outputBucketName, resourceName+".json");
             streamObject(jsondoc, resourceName, compartmentId);
 
             return jsondoc.toString(); //"ok";
