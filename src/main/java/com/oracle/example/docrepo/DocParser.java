@@ -8,6 +8,12 @@ import com.oracle.bmc.objectstorage.requests.GetObjectRequest;
 import com.oracle.bmc.objectstorage.requests.PutObjectRequest;
 import com.oracle.bmc.objectstorage.responses.GetObjectResponse;
 import com.oracle.bmc.objectstorage.responses.PutObjectResponse;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
+
+import com.oracle.bmc.responses.AsyncHandler;
+import com.oracle.bmc.objectstorage.ObjectStorageAsyncClient;
+
 import com.oracle.bmc.streaming.StreamClient;
 import com.oracle.bmc.streaming.model.PutMessagesDetails;
 import com.oracle.bmc.streaming.model.PutMessagesDetailsEntry;
@@ -39,12 +45,14 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 public class DocParser {
     private ObjectStorage objectStorageClient;
+    private ObjectStorageAsyncClient objectStorageAsyncClient;
     private StreamAdminClient streamAdminClient;
     private final String outputBucketName;
     private ResourcePrincipalAuthenticationDetailsProvider provider;
@@ -65,6 +73,8 @@ public class DocParser {
             provider  = ResourcePrincipalAuthenticationDetailsProvider.builder().build();
             System.err.println("ResourcePrincipalAuthenticationDetailsProvider setup");
             objectStorageClient = ObjectStorageClient.builder().build(provider);
+            objectStorageAsyncClient = ObjectStorageAsyncClient.builder().build(provider);
+
 //            objectStorageClient.setRegion(Region.EU_FRANKFURT_1);
             System.out.println("ObjectStorage client setup");
 
@@ -87,8 +97,6 @@ public class DocParser {
                             .objectName(filename)
                             .build();
             GetObjectResponse getObjectResponse = objectStorageClient.getObject(getObjectRequest);
-            getObjectResponse.getInputStream().close();
-
             return getObjectResponse;
         } catch (Exception e) {
             throw new RuntimeException("Could not read from os!" + e.getMessage());
@@ -100,6 +108,7 @@ public class DocParser {
         Tika tika = new Tika();
         Metadata metadata = new Metadata();
         Reader reader = tika.parse(objectResponse.getInputStream(), metadata);
+        objectResponse.getInputStream().close();
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
         //getting metadata of the document
         String[] metadataNames = metadata.names();
@@ -114,6 +123,7 @@ public class DocParser {
             stringBuilder.append(line);
         }
         String content = stringBuilder.toString();
+        bufferedReader.close();
         jsonObjectBuilder.add("content",content);
         jsonObjectBuilder.add("md5",objectResponse.getContentMd5());
         jsonObjectBuilder.add("path",path);
@@ -126,18 +136,24 @@ public class DocParser {
         try {
             String jsonString = jsonObject.toString();
             System.err.println("JSON: " + jsonString);
+            ByteArrayInputStream baos = new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
             PutObjectRequest putObjectRequest =
                     PutObjectRequest.builder()
                             .namespaceName(namespace)
                             .bucketName(bucketName)
                             .objectName(objectName)
-                            .contentType("application/octet-stream")
-                            .putObjectBody(new ByteArrayInputStream(jsonString.getBytes()))
+                            .contentType("application/json")
+                            .putObjectBody(baos)
+                            .contentLength((long) baos.available())
                             .build();
 
-            PutObjectResponse putObjectResponse = objectStorageClient.putObject(putObjectRequest);
-            System.err.println("New object md5: " + putObjectResponse.getOpcContentMd5());
-        } catch (Exception e) {
+//            PutObjectResponse putObjectResponse = objectStorageClient.putObject(putObjectRequest);
+//            System.err.println("New object md5: " + putObjectResponse.getOpcContentMd5());
+            ResponseHandler<PutObjectRequest, PutObjectResponse> putObjectHandler =
+                    new ResponseHandler<>();
+            Future<PutObjectResponse> putObjectResponseFuture = objectStorageAsyncClient.putObject(putObjectRequest, putObjectHandler);
+ 
+} catch (Exception e) {
             throw new RuntimeException("Failed to write to os " + e);
         }
     }
@@ -209,8 +225,8 @@ public class DocParser {
 
             JsonObject jsondoc = parseObject(getObjectResponse, path);
 
-            writeObject(jsondoc, namespace, outputBucketName, resourceName+".json");
             streamObject(jsondoc, resourceName, compartmentId);
+            writeObject(jsondoc, namespace, outputBucketName, resourceName+".json");
 
             return jsondoc.toString(); //"ok";
         } catch (Exception ex) {
@@ -219,5 +235,37 @@ public class DocParser {
             return "oops";
         }
     }
+    static class ResponseHandler<IN, OUT> implements AsyncHandler<IN, OUT> {
+        private Throwable failed = null;
+        private CountDownLatch latch = new CountDownLatch(1);
+
+        private void waitForCompletion() throws Exception {
+            latch.await();
+            if (failed != null) {
+                if (failed instanceof Exception) {
+                    throw (Exception) failed;
+                }
+                throw (Error) failed;
+            }
+        }
+
+        @Override
+        public void onSuccess(IN request, OUT response) {
+            if (response instanceof PutObjectResponse) {
+                System.out.println(
+                        "New object md5: " + ((PutObjectResponse) response).getOpcContentMd5());
+            } else if (response instanceof GetObjectResponse) {
+                System.out.println("Object md5: " + ((GetObjectResponse) response).getContentMd5());
+            }
+            latch.countDown();
+        }
+
+        @Override
+        public void onError(IN request, Throwable error) {
+            failed = error;
+            latch.countDown();
+        }
+    }
+
 
 }
