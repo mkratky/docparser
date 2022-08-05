@@ -32,9 +32,7 @@ import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.xml.sax.SAXException;
 
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
+import javax.json.*;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -89,6 +87,8 @@ public class DocParser {
                             .objectName(filename)
                             .build();
             GetObjectResponse getObjectResponse = objectStorageClient.getObject(getObjectRequest);
+            getObjectResponse.getInputStream().close();
+
             return getObjectResponse;
         } catch (Exception e) {
             throw new RuntimeException("Could not read from os!" + e.getMessage());
