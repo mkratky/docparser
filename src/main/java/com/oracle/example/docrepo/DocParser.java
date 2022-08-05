@@ -67,7 +67,7 @@ public class DocParser {
             provider  = ResourcePrincipalAuthenticationDetailsProvider.builder().build();
             System.err.println("ResourcePrincipalAuthenticationDetailsProvider setup");
             objectStorageClient = ObjectStorageClient.builder().build(provider);
-            objectStorageClient.setRegion(Region.EU_FRANKFURT_1);
+//            objectStorageClient.setRegion(Region.EU_FRANKFURT_1);
             System.out.println("ObjectStorage client setup");
 
             streamAdminClient = StreamAdminClient.builder().build(provider);
