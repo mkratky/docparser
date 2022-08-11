@@ -147,11 +147,13 @@ public class DocParser {
                             .contentLength((long) baos.available())
                             .build();
 
-//            PutObjectResponse putObjectResponse = objectStorageClient.putObject(putObjectRequest);
-//            System.err.println("New object md5: " + putObjectResponse.getOpcContentMd5());
-            ResponseHandler<PutObjectRequest, PutObjectResponse> putObjectHandler =
-                    new ResponseHandler<>();
-            Future<PutObjectResponse> putObjectResponseFuture = objectStorageAsyncClient.putObject(putObjectRequest, putObjectHandler);
+            PutObjectResponse putObjectResponse = objectStorageClient.putObject(putObjectRequest);
+            System.err.println("New object md5: " + putObjectResponse.getOpcContentMd5());
+
+//            ResponseHandler<PutObjectRequest, PutObjectResponse> putObjectHandler = new ResponseHandler<>();
+//            Future<PutObjectResponse> putObjectResponseFuture = objectStorageAsyncClient.putObject(putObjectRequest, putObjectHandler);
+
+
  
 } catch (Exception e) {
             throw new RuntimeException("Failed to write to os " + e);
