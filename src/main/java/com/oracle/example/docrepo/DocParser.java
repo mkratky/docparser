@@ -8,6 +8,8 @@ import com.oracle.bmc.objectstorage.requests.GetObjectRequest;
 import com.oracle.bmc.objectstorage.requests.PutObjectRequest;
 import com.oracle.bmc.objectstorage.responses.GetObjectResponse;
 import com.oracle.bmc.objectstorage.responses.PutObjectResponse;
+
+import java.io.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
@@ -39,13 +41,15 @@ import org.apache.tika.metadata.Metadata;
 import org.xml.sax.SAXException;
 
 import javax.json.*;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.nio.charset.StandardCharsets;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -55,11 +59,18 @@ public class DocParser {
     private ObjectStorageAsyncClient objectStorageAsyncClient;
     private StreamAdminClient streamAdminClient;
     private final String outputBucketName;
+    private final String openSearchEndpoint;
+
+    private final String streamName;
+
     private ResourcePrincipalAuthenticationDetailsProvider provider;
 
     public DocParser(RuntimeContext ctx) {
         initOciClients();
         outputBucketName = reqEnv(ctx, "OUTPUT_BUCKET");
+        openSearchEndpoint = reqEnv(ctx, "SEARCH_ENDPOINT");
+        streamName = reqEnv(ctx, "STREAM_NAME");
+
     }
 
     private String reqEnv(RuntimeContext ctx, String key) {
@@ -155,7 +166,7 @@ public class DocParser {
 
 
  
-} catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to write to os " + e);
         }
     }
@@ -164,7 +175,6 @@ public class DocParser {
         try {
             String jsonString = jsonObject.toString();
             System.err.println("JSON: " + jsonString);
-            String streamName = "docrepo";
             Stream stream;
             ListStreamsRequest listRequest = ListStreamsRequest.builder().compartmentId(compartmentId)
                     .lifecycleState(Stream.LifecycleState.Active).name(streamName).build();
@@ -214,6 +224,31 @@ public class DocParser {
         }
     }
 
+    private void indexObject(JsonObject jsonObject, String objectName) {
+        try {
+            String jsonString = jsonObject.toString();
+            System.err.println("JSON: " + jsonString);
+
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            HttpPost httpPost = new HttpPost(openSearchEndpoint + "/docrepo/document");
+            ByteArrayEntity input = new ByteArrayEntity(jsonString.getBytes(StandardCharsets.UTF_8));
+            input.setContentType("application/json");
+            httpPost.setEntity(input);
+
+            CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
+            System.out.println("POST Response Status:: " + httpResponse.getStatusLine().getStatusCode());
+            BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
+            System.out.println("Output from Server .... \n");
+            String output = "";
+            while ((output = br.readLine()) != null) {
+                System.out.println(output);
+            }
+            httpClient.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to write to index " + e);
+        }
+    }
+
     public String handleRequest(@InputBinding(coercion = OCIEventBinding.class) ObjectStorageObjectEvent event) {
         System.err.println("Got a new event: " + event.toString());
         try {
@@ -229,6 +264,7 @@ public class DocParser {
 
             streamObject(jsondoc, resourceName, compartmentId);
             writeObject(jsondoc, namespace, outputBucketName, resourceName+".json");
+            indexObject(jsondoc, resourceName);
 
             return jsondoc.toString(); //"ok";
         } catch (Exception ex) {
