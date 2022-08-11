@@ -136,7 +136,6 @@ public class DocParser {
         String content = stringBuilder.toString();
         bufferedReader.close();
         jsonObjectBuilder.add("content",content);
-        jsonObjectBuilder.add("md5",objectResponse.getContentMd5());
         jsonObjectBuilder.add("path",path);
         JsonObject jsonObject = jsonObjectBuilder.build();
 
