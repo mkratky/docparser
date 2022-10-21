@@ -30,7 +30,7 @@ After building the code, it will create a function docparser in the doc-applicat
 In the OCI console Go the menu
   #### Developer Services
     Functions / Application
-  ####  Go back to the docs-application
+  ####  Click on the docs-application
   ####  Click Functions
   ####  Click the name of the function docparser
   ####  Click Configuration
