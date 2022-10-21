@@ -14,7 +14,7 @@ In the OCI console Go the menu
   #### Click Create
   
 ## Step 2: Build and deploy the Function in the Cloud Shell
-  #### Start the cloud Shell (notice that you can upload and download files from it)
+  #### Start the cloud Shell (notice that you can upload and download files from it if needed)
   #### Run following commands in the shell:
     fn list context
     fn list contextfn use context eu-frankfurt-1
