@@ -19,7 +19,7 @@ In the OCI console Go the menu
     fn list context
     fn list contextfn use context eu-frankfurt-1
     fn update context oracle.compartment-id <your compartment ocid>
-    fn update context registry fra.ocir.io/xxxxxx/docapp   #xxxxxx is your tenancy namespace
+    fn update context registry fra.ocir.io/xxxxxx/docsapp   #xxxxxx is your tenancy namespace
     docker login -u 'xxxxx/oracleidentitycloudservice/name@domain.com' fra.ocir.io #You will need to generate a token under your OCI user to log to the container registry.  
     git clone https://github.com/mkratky/docparser.git
     cd docparser
