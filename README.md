@@ -2,7 +2,7 @@
 OCI Function triggered by OCI Events when a new object is created on Object Storage. The funciton extracts metadata and text from various document types using Apache Tika and writes the output as JSON to OCI Streaming, Object Storage bucket and OpenSearch.
 
 # Steps to deploy
-## Step 1: Create the Application
+## Step 1: Create the Function Application
 In the OCI console Go the menu
   #### Developer Services
     Functions / Application
