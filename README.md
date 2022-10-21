@@ -43,18 +43,18 @@ Object storage will be used to contain the documents to index.
 In OCI console Go the menu
   #### Storage
     Object Storage / Bucket
-    #### Choose the right compartment 
-    #### Click Create Bucket
+   Choose the right compartment 
+   #### Click Create Bucket
     Bucket name: e.g. docs-upload
     Check: Emit Object Events
-    #### Click Create
+   #### Click Create
     
 ## Step 5: Create an Event Rule
 In OCI console Go the menu
   #### Observability & Management
     Event Rules
-    Check that you are in the right compartment
-    #### Click Create Rule
+  Check that you are in the right compartment
+  #### Click Create Rule
       Display Name: docs-upload-rule
       Add the Rules Condition:
         Condition: Event Type
@@ -69,25 +69,25 @@ In OCI console Go the menu
         Function Compartment: <your compartment name>
         Function Application: docs-application
         Fuction: docparser
-    #### Click Create Rule
+   #### Click Create Rule
     
 ## Step 6: Create a Dynamic group and Policies   
 The Dynamic Group will allow to give rights to the function to read the Object Storage.
 In OCI console Go the menu
   #### Identity & Security
     Dynamic Groups
-      #### Click Create Dynamic Group
+   #### Click Create Dynamic Group
       Name: docs-fn-dyngroup
       Description: docs-fn-dyngroup
       Rule: ALL {resource.type = 'fnfunc', resource.compartment.id = '##COMPARTMENT_OCID##'} 
       where you need to replace the value ##COMPARTMENT_OCID## with your compartment ocid
-      #### Click Create
+   #### Click Create
   
  In OCI console Go the menu
    #### Identity & Security
     Policies
       Check that you are in the right compartment
-      #### Click Create Policy
+   #### Click Create Policy
       Name: docs-fn-policy
       Description: docs-fn-policy
       Choose: Show manual editor
@@ -99,11 +99,11 @@ To run the application upload your document(s) you wish to index to the Object s
 In OCI console Go the menu
   #### Storage
     Object Storage / Bucket
-    Choose the right compartment 
-    #### Click Bucket name: e.g. docs-upload 
-    #### Click Upload
+   Choose the right compartment 
+   #### Click Bucket name: e.g. docs-upload 
+   #### Click Upload
     Choose Files from your Computer (Drop files here or select files)
-    #### Click Upload
+   #### Click Upload
     
     
       
