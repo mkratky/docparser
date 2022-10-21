@@ -3,7 +3,7 @@ OCI Function triggered by OCI Events when a new object is created on Object Stor
 
 # Steps to deploy
 ## Step 1: Create the Function Application
-In the OCI console Go the menu
+In the OCI console Go to the menu
   #### Developer Services
     Functions / Application
   Check that you are in the right compartment 
@@ -27,7 +27,7 @@ In the OCI console Go the menu
     
 ## Step 3: Configure the Function variables
 After building the code, it will create a function docparser in the doc-application
-In the OCI console Go the menu
+In the OCI console Go to the menu
   #### Developer Services
     Functions / Application
   ####  Click on the docs-application
@@ -40,7 +40,7 @@ In the OCI console Go the menu
    
 ## Step 4: Create an Object Storage Bucket   
 Object storage will be used to contain the documents to index.
-In OCI console Go the menu
+In OCI console Go to the menu
   #### Storage
     Object Storage / Bucket
    Choose the right compartment 
@@ -50,7 +50,7 @@ In OCI console Go the menu
    #### Click Create
     
 ## Step 5: Create an Event Rule
-In OCI console Go the menu
+In OCI console Go to the menu
   #### Observability & Management
     Event Rules
   Check that you are in the right compartment
@@ -73,7 +73,7 @@ In OCI console Go the menu
     
 ## Step 6: Create a Dynamic group and Policies   
 The Dynamic Group will allow to give rights to the function to read the Object Storage.
-In OCI console Go the menu
+In OCI console Go to the menu
   #### Identity & Security
     Dynamic Groups
    #### Click Create Dynamic Group
@@ -83,10 +83,10 @@ In OCI console Go the menu
       where you need to replace the value ##COMPARTMENT_OCID## with your compartment ocid
    #### Click Create
   
- In OCI console Go the menu
+ In OCI console Go to the menu
    #### Identity & Security
     Policies
-      Check that you are in the right compartment
+   Check that you are in the right compartment
    #### Click Create Policy
       Name: docs-fn-policy
       Description: docs-fn-policy
@@ -96,7 +96,7 @@ In OCI console Go the menu
       
 ## Step 7: Running the application  
 To run the application upload your document(s) you wish to index to the Object storage bucket
-In OCI console Go the menu
+In OCI console Go to the menu
   #### Storage
     Object Storage / Bucket
    Choose the right compartment 
