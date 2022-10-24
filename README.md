@@ -92,8 +92,10 @@ In OCI console Go to the menu
       Description: docs-fn-policy
       Choose: Show manual editor
       Copy paste the policies: 
-        Allow dynamic-group docs-fn-dyngroup to manage objects in compartment ##COMPARTMENT_NAME##
         Allow service cloudEvents to use functions-family in compartment ##COMPARTMENT_NAME##
+        Allow dynamic-group docs-fn-dyngroup to manage objects in compartment ##COMPARTMENT_NAME##
+        Allow dynamic-group docs-fn-dyngroup to inspect streams in compartment ##COMPARTMENT_NAME##
+        Allow dynamic-group docs-fn-dyngroup to use stream-push in compartment ##COMPARTMENT_NAME##
       where you need to replace the value ##COMPARTMENT_NAME## with your compartment name
       
 ## Step 7: Running the application  
