@@ -25,7 +25,7 @@ In the OCI console Go to the menu
     cd docparser
     fn -v deploy --app docs-application
     
-## Step 3: Configure the Function variables
+## Step 3: Configure the Function environment variables
 After building the code, it will create a function docparser in the doc-application
 In the OCI console Go to the menu
   #### Developer Services
