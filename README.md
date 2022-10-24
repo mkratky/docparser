@@ -35,8 +35,8 @@ In the OCI console Go to the menu
   ####  Click the name of the function docparser
   ####  Click Configuration
       Add Key: OUTPUT_BUCKET , Value: <name of your existing Object Storage bucket e.g. docs-extract>
-      Add Key: STREAM_NAME , Value: <e.g. docsextract , if the stream name doesn't exist it will get created>
-      Add Key: SEARCH_ENDPOINT , Value: <your OpenSearch API endpoint>
+      Add Key: STREAM_NAME , Value: <name of your existing Stream e.g. docsextract>
+      Add Key: SEARCH_ENDPOINT , Value: <your existing OpenSearch API endpoint>
    
 ## Step 4: Create an Object Storage Bucket   
 Object storage will be used to contain the documents to index.
